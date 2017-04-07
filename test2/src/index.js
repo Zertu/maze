@@ -1,54 +1,45 @@
-let current = [0, 0]
+let maps = []
 window.onload = e => {
     const walls = getWall()
     const start = document.getElementsByClassName('row')[0].children[0]
     $(start).addClass('mouse')
-    let target
-    window.addEventListener('keydown', e => {
-        switch (e.code) {
-            case 'ArrowUp':
-                target = [current[0], current[1] - 1]
-                current = move(current, target, walls)
-                break
-            case 'ArrowDown':
-                target = [current[0] , current[1]+ 1]
-                current = move(current, target, walls)
-                break
-            case 'ArrowLeft':
-                target = [current[0] - 1, current[1]]
-                current = move(current, target, walls)
-                break
-            case 'ArrowRight':
-                target = [current[0]+ 1, current[1] ]
-                current = move(current, target, walls)
-                break
-        }
-    }, false)
+    search([0, 0], walls)
 }
 
-
-function move(current, target, walls) {
-    if(target[0]<=0||target[0]>=20){
-        return current
-    }
-    let wall = walls[current[1]][current[0]]
-    for (let i = 0; i < wall.length; i++) {
-        if (wall[i][0] === target[0] && wall[i][1] === target[1]) {
-            return current
+function search(position, walls) {
+    const y = position[0],
+        x = position[1],
+        wall = walls[x][y]
+    let routes = [
+        [y, x - 1],
+        [y, x + 1],
+        [y - 1, x],
+        [y + 1, x]
+    ]
+    routes = routes.filter(val => {
+        for (let i = 0; i < wall.length; i++) {
+            if (notequal(wall[i], val)) continue
+            else {
+                return false
+            }
         }
-    }
-    current = document.getElementsByClassName('row')[current[1]].children[current[0]]
-    let newtarget = document.getElementsByClassName('row')[target[1]].children[target[0]]
-    $(current).removeClass('mouse')
-    $(newtarget).addClass('mouse')
-    return target
+        return true
+    })
+    console.log(routes)
 }
+
+function notequal(a, b) {
+    if (b[0] < 0 || b[1] < 0) return false
+    return a[0] !== b[0] || (a[1] !== b[1])
+}
+
 
 function getWall() {
     const rows = Array.prototype.slice.call(document.getElementsByClassName('row'))
     let arr = []
     //列
     rows.map((row, i) => {
+        maps.push([])
         arr.push([])
         //行
         Array.prototype.slice.call(row.children).map((child, index) => {
